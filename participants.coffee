@@ -35,6 +35,12 @@ MS.Participants = new Mongo.Collection 'participants'
 MS.Participants.attachSchema MS.ParticipantSchema
 MS.Participants.attachBehaviour 'timestampable'
 
+MS.Participants.allow
+  insert: (userId, doc) -> !!userId
+  update: (userId, doc) -> userId == doc.userId
+  remove: (userId, doc) -> userId == doc.userId
+  fetch: ['userId']
+
 ###
 Instance methods
 --------------------------------------------------------------------------------

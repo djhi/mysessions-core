@@ -36,6 +36,12 @@ MS.RecurringEvents = new Mongo.Collection 'recurringEvents'
 MS.RecurringEvents.attachSchema MS.RecurringEventSchema
 MS.RecurringEvents.attachBehaviour 'timestampable'
 
+MS.RecurringEvents.allow
+  insert: (userId, doc) -> !!userId
+  update: (userId, doc) -> userId == doc.userId
+  remove: (userId, doc) -> userId == doc.userId
+  fetch: ['userId']
+
 ###
 Static methods
 --------------------------------------------------------------------------------

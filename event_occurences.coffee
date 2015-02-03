@@ -31,6 +31,12 @@ MS.EventOccurences = new Mongo.Collection 'eventOccurences'
 MS.EventOccurences.attachSchema MS.EventOccurenceSchema
 MS.EventOccurences.attachBehaviour 'timestampable'
 
+MS.EventOccurences.allow
+  insert: (userId, doc) -> !!userId
+  update: (userId, doc) -> userId == doc.userId
+  remove: (userId, doc) -> userId == doc.userId
+  fetch: ['userId']
+  
 ###
 Static methods
 --------------------------------------------------------------------------------
