@@ -46,6 +46,9 @@ Instance methods
 --------------------------------------------------------------------------------
 ###
 MS.Participants.helpers
+  name: ->
+    "#{@lastName}, #{@firstName}"
+
   eventOccurences: ->
     MS.EventOccurences.findAllByIds @eventOccurencesIds
 

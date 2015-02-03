@@ -1,6 +1,7 @@
 {
   "date": "Date",
   "category": "Category",
+  "participants": "Participants",
   "lastName": "Last name",
   "firstName": "First name",
   "name": "Name",

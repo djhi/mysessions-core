@@ -24,6 +24,7 @@ MS.EventOccurenceSchema = new SimpleSchema
     type: String
 
   participantsIds:
+    i18nLabel: 'participants'
     type: [String]
     defaultValue: []
 
@@ -36,7 +37,7 @@ MS.EventOccurences.allow
   update: (userId, doc) -> userId == doc.userId
   remove: (userId, doc) -> userId == doc.userId
   fetch: ['userId']
-  
+
 ###
 Static methods
 --------------------------------------------------------------------------------
