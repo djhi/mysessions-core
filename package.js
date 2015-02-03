@@ -10,6 +10,7 @@ Package.on_use(function(api, where) {
   api.use('coffeescript', both);
   api.use('mongo', both);
   api.use('templating', both);
+  api.use('check', both);
   api.use('dburles:collection-helpers@1.0.2', both);
   api.use('matb33:collection-hooks@0.7.9', both);
   api.use('aldeed:simple-schema', both);
@@ -17,19 +18,30 @@ Package.on_use(function(api, where) {
   api.use('zimme:collection-behaviours', both);
   api.use('zimme:collection-timestampable', both);
   api.use('zimme:collection-softremovable', both);
+  api.use('tap:i18n@1.3.2', both);
 
   api.imply('underscore', both);
   api.imply('coffeescript', both);
   api.imply('mongo', both);
+  api.imply('check', both);
   api.imply('aldeed:simple-schema', both);
   api.imply('aldeed:collection2', both);
+  api.imply('tap:i18n@1.3.2', both);
+
+  api.add_files("package-tap.i18n", both);
 
   api.add_files([
     "namespaces.coffee",
     "utils.coffee",
+    "simple-schema-i18n.coffee",
     "participants.coffee",
     "event_occurences.coffee",
     "recurring_events.coffee",
+  ], both);
+
+  api.add_files([
+    "i18n/en.i18n.json",
+    "i18n/fr.i18n.json",
   ], both);
 
   api.export("MS", both);

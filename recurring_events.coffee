@@ -5,6 +5,7 @@ Schema & Collection
 MS.RecurringEventSchema = new SimpleSchema
   name:
     type: String
+    i18nLabel: 'name'
 
   userId:
     type: String
@@ -21,6 +22,7 @@ MS.RecurringEventSchema = new SimpleSchema
   description:
     type: String
     optional: true
+    i18nLabel: 'description'
 
   participantsIds:
     type: [String]

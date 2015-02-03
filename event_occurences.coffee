@@ -4,6 +4,7 @@ Schema & Collection
 ###
 MS.EventOccurenceSchema = new SimpleSchema
   date:
+    i18nLabel: 'date'
     type: Date
 
   userId:
@@ -19,6 +20,7 @@ MS.EventOccurenceSchema = new SimpleSchema
         @unset()
 
   recurringEventId:
+    i18nLabel: 'category'
     type: String
 
   participantsIds:

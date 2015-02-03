@@ -5,9 +5,11 @@ Schema & Collection
 MS.ParticipantSchema = new SimpleSchema
   lastName:
     type: String
+    i18nLabel: 'lastName'
 
   firstName:
     type: String
+    i18nLabel: 'firstName'
 
   userId:
     type: String
