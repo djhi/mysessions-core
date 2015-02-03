@@ -100,3 +100,16 @@ if Meteor.isServer
       participantsModifiers.$addToSet.recurringEventsIds = eventOccurence.recurringEventId
 
     MS.Participants.update modifiers.$addToSet.participantsIds, participantsModifiers
+
+###
+Publications
+--------------------------------------------------------------------------------
+###
+if Meteor.isServer
+  Meteor.publish "eventOccurences", ->
+    MS.EventOccurences.find
+      userId: @userId
+
+  Meteor.publish "eventOccurence", (id)->
+    MS.EventOccurences.find
+      _idid: id

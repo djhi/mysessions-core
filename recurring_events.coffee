@@ -65,3 +65,13 @@ MS.RecurringEvents.helpers
 
   addParticipant: (participantId) ->
     MS.RecurringEvents.addParticipant @_id, participantId
+
+
+###
+Publications
+--------------------------------------------------------------------------------
+###
+if Meteor.isServer
+  Meteor.publish "recurringEvents", ->
+    MS.RecurringEvents.find
+      userId: @userId
