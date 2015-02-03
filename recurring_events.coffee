@@ -46,32 +46,28 @@ MS.RecurringEvents.allow
 Static methods
 --------------------------------------------------------------------------------
 ###
-MS.RecurringEvents.addParticipant = (recurringEventId, participantId) ->
-  check(recurringEventId, String)
-  check(participantId, String)
-
-  # add the participant to the recurring event
-  modifiers = $addToSet: participantsIds: participantId
-  MS.RecurringEvents.update recurringEventId, modifiers
-
-  # add the recurring event to the participant list of recurring event
-  modifiers = $addToSet: recurringEventsIds: recurringEventId
-  MS.Participants.update participantId, modifiers
+MS.RecurringEvents.findByUser = (userId) ->
+  @find
+    userId: userId
+  ,
+    sort: name: 1
 
 ###
 Instance methods
 --------------------------------------------------------------------------------
 ###
 MS.RecurringEvents.helpers
+  participantsCount: ->
+    @participantsIds?.length or 0
+
   participants: ->
     MS.Participants.findAllByIds @participantsIds
 
+  eventOccurencesCount: ->
+    @eventOccurencesIds?.length or 0
+
   eventOccurences: ->
     MS.EventOccurences.findByRecurringEvent @_id
-
-  addParticipant: (participantId) ->
-    MS.RecurringEvents.addParticipant @_id, participantId
-
 
 ###
 Publications
@@ -79,5 +75,4 @@ Publications
 ###
 if Meteor.isServer
   Meteor.publish "recurringEvents", ->
-    MS.RecurringEvents.find
-      userId: @userId
+    MS.RecurringEvents.findByUser @userId

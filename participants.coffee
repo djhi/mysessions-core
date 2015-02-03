@@ -42,15 +42,45 @@ MS.Participants.allow
   fetch: ['userId']
 
 ###
+Static methods
+--------------------------------------------------------------------------------
+###
+MS.Participants.findByUser = (userId) ->
+  @find
+    userId: userId
+  ,
+    sort: name: 1
+
+###
 Instance methods
 --------------------------------------------------------------------------------
 ###
 MS.Participants.helpers
   name: ->
-    "#{@lastName}, #{@firstName}"
+    lastName = @lastName
+    firstName = @firstName
+    "#{lastName}, #{firstName}"
+
+  eventOccurencesCount: ->
+    @eventOccurencesIds?.length or 0
 
   eventOccurences: ->
     MS.EventOccurences.findAllByIds @eventOccurencesIds
 
+  recurringEventsCount: ->
+    @recurringEventsIds?.length or 0
+
   recurringEvents: ->
     MS.RecurringEvents.findAllByIds @recurringEventsIds
+
+###
+Publications
+--------------------------------------------------------------------------------
+###
+if Meteor.isServer
+  Meteor.publish "participants", ->
+    MS.Participants.findByUser @userId
+
+  Meteor.publish "participant", (id)->
+    MS.Participants.find
+      _id: id

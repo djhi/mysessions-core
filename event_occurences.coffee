@@ -26,6 +26,7 @@ MS.EventOccurenceSchema = new SimpleSchema
   participantsIds:
     i18nLabel: 'participants'
     type: [String]
+    optional: true
     defaultValue: []
 
 MS.EventOccurences = new Mongo.Collection 'eventOccurences'
@@ -48,29 +49,25 @@ MS.EventOccurences.findByRecurringEvent = (recurringEventId) ->
   ,
     sort: date: - 1
 
-MS.EventOccurences.addParticipant = (eventOccurenceId, participantId) ->
-  check(eventOccurenceId, String)
-  check(participantId, String)
-
-  # add the participant to this event occurence and to the recurring event
-  MS.EventOccurences.update eventOccurenceId
+MS.EventOccurences.findByUser = (userId) ->
+  @find
+    userId: userId
   ,
-    $addToSet: participantsIds: participantId
+    sort: date: - 1
 
 ###
 Instance methods
 --------------------------------------------------------------------------------
 ###
 MS.EventOccurences.helpers
+  participantsCount: ->
+    @participantsIds?.length or 0
+
   participants: ->
     MS.Participants.findAllByIds @participantsIds
 
   recurringEvent: ->
     MS.RecurringEvents.findOne @recurringEventId
-
-  addParticipant: (participantId) ->
-    MS.EventOccurences.addParticipant @_id, participantId
-
 
 ###
 Hooks
@@ -90,23 +87,29 @@ if Meteor.isServer
       else
         doc.recurringEventId = undefined
 
-  MS.EventOccurences.after.update (userId, eventOccurence, fieldNames, modifiers, options) ->
-    if !modifiers.$addToSet?.participantsIds then return
-
-    # add the participant to the occurence recurring event if any
-    if !!eventOccurence.recurringEventId
-      MS.RecurringEvents.update eventOccurence.recurringEventId
-      ,
-        modifiers
-
-    # add the event to the participant list of events
+  MS.EventOccurences.after.insert (userId, eventOccurence, fieldNames, modifiers, options) ->
+    # add the event to the each participant list of events
     participantsModifiers = $addToSet: eventOccurencesIds: eventOccurence._id
 
     # and the recurring event if any
     if !!eventOccurence.recurringEventId
       participantsModifiers.$addToSet.recurringEventsIds = eventOccurence.recurringEventId
 
-    MS.Participants.update modifiers.$addToSet.participantsIds, participantsModifiers
+    MS.Participants.update
+      _id: $in: eventOccurence.participantsIds
+      participantsModifiers
+
+  MS.EventOccurences.after.update (userId, eventOccurence, fieldNames, modifiers, options) ->
+    # add the event to the each participant list of events
+    participantsModifiers = $addToSet: eventOccurencesIds: eventOccurence._id
+
+    # and the recurring event if any
+    if !!eventOccurence.recurringEventId
+      participantsModifiers.$addToSet.recurringEventsIds = eventOccurence.recurringEventId
+
+    MS.Participants.update
+      _id: $in: eventOccurence.participantsIds
+      participantsModifiers
 
 ###
 Publications
@@ -114,9 +117,8 @@ Publications
 ###
 if Meteor.isServer
   Meteor.publish "eventOccurences", ->
-    MS.EventOccurences.find
-      userId: @userId
+    MS.EventOccurences.findByUser @userId
 
   Meteor.publish "eventOccurence", (id)->
     MS.EventOccurences.find
-      _idid: id
+      _id: id

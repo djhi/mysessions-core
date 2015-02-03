@@ -49,34 +49,11 @@ describe "mysessions:core", ->
       expect(spies.participantsFind).to.have.been.calledWith _id: $in: recurringEvent.participantsIds
 
       return
+      
     it "RecurringEvent.eventOccurences should call MS.EventOccurences.find filtering recurringEventId by its _id", ->
       recurringEvent = MS.RecurringEvents.findOne()
       eventOccurences = recurringEvent.eventOccurences()
 
       expect(spies.eventOccurencesFind).to.have.been.calledWith recurringEventId: recurringEvent._id
-
-      return
-
-    it "RecurringEvent.addParticipant should call MS.RecurringEvents.update adding the participant to its participantsIds array", ->
-      recurringEvent = MS.RecurringEvents.findOne()
-      participantId = 'participantTest'
-
-      recurringEvent.addParticipant participantId
-
-      expect(spies.recurringEventsUpdate).to.have.been.calledWith recurringEvent._id
-      ,
-        sinon.match($addToSet: participantsIds: participantId)
-
-      return
-
-    it "RecurringEvent.addParticipant should call MS.Participants.update adding the recurring event id to its recurringEventsIds array", ->
-      recurringEvent = MS.RecurringEvents.findOne()
-      participantId = 'participantTest'
-
-      recurringEvent.addParticipant participantId
-
-      expect(spies.participantsUpdate).to.have.been.calledWith participantId
-      ,
-        sinon.match($addToSet: recurringEventsIds: recurringEvent._id)
 
       return
