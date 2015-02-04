@@ -87,7 +87,10 @@ if Meteor.isServer
       else
         doc.recurringEventId = undefined
 
-  MS.EventOccurences.after.insert (userId, eventOccurence, fieldNames, modifiers, options) ->
+  MS.EventOccurences.after.insert (userId, eventOccurence) ->
+    if !eventOccurence.participantsIds or !eventOccurence.participantsIds.length
+      return
+
     # add the event to the each participant list of events
     participantsModifiers = $addToSet: eventOccurencesIds: eventOccurence._id
 
@@ -95,11 +98,14 @@ if Meteor.isServer
     if !!eventOccurence.recurringEventId
       participantsModifiers.$addToSet.recurringEventsIds = eventOccurence.recurringEventId
 
-    MS.Participants.update
+    MS.Participants.direct.update
       _id: $in: eventOccurence.participantsIds
       participantsModifiers
 
-  MS.EventOccurences.after.update (userId, eventOccurence, fieldNames, modifiers, options) ->
+  MS.EventOccurences.after.update (userId, eventOccurence) ->
+    if !eventOccurence.participantsIds or !eventOccurence.participantsIds.length
+      return
+    
     # add the event to the each participant list of events
     participantsModifiers = $addToSet: eventOccurencesIds: eventOccurence._id
 
@@ -107,7 +113,7 @@ if Meteor.isServer
     if !!eventOccurence.recurringEventId
       participantsModifiers.$addToSet.recurringEventsIds = eventOccurence.recurringEventId
 
-    MS.Participants.update
+    MS.Participants.direct.update
       _id: $in: eventOccurence.participantsIds
       participantsModifiers
 
