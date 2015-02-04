@@ -43,14 +43,14 @@ MS.EventOccurences.allow
 Static methods
 --------------------------------------------------------------------------------
 ###
-MS.EventOccurences.findByRecurringEvent = (recurringEventId) ->
-  @find
+MS.EventOccurences.findByRecurringEvent = findByRecurringEvent = (recurringEventId) ->
+  MS.EventOccurences.find
     recurringEventId: recurringEventId
   ,
     sort: date: - 1
 
-MS.EventOccurences.findByUser = (userId) ->
-  @find
+MS.EventOccurences.findByUser = findByUser = (userId) ->
+  MS.EventOccurences.find
     userId: userId
   ,
     sort: date: - 1
@@ -74,48 +74,50 @@ Hooks
 --------------------------------------------------------------------------------
 ###
 if Meteor.isServer
-  MS.EventOccurences.before.insert (userId, doc) ->
-    unless SimpleSchema.RegEx.Id.test doc.recurringEventId
+  MS.EventOccurences.ensureValidRecurringEvent = ensureValidRecurringEvent = (userId, recurringEventIdOrName) ->
+    unless SimpleSchema.RegEx.Id.test recurringEventIdOrName
       # if the recurringEventId is not an valid identifier
       # this is the name of a new recurring event
-      recurringEventId = MS.RecurringEvents.insert
-        name: doc.recurringEventId
+      return MS.RecurringEvents.insert
+        name: recurringEventIdOrName
         userId: userId
 
-      if recurringEventId
-        doc.recurringEventId = recurringEventId
-      else
-        doc.recurringEventId = undefined
+    return recurringEventIdOrName
+
+  MS.EventOccurences.updateParticipants = updateParticipants = (userId, eventOccurence) ->
+    if !eventOccurence.participantsIds or !eventOccurence.participantsIds.length
+      return
+
+    # add the event to the each participant list of events
+    participantsModifiers = $addToSet: eventOccurencesIds: eventOccurence._id
+
+    # and the recurring event if any
+    if !!eventOccurence.recurringEventId
+      participantsModifiers.$addToSet.recurringEventsIds = eventOccurence.recurringEventId
+
+    MS.Participants.direct.update
+      _id: $in: eventOccurence.participantsIds
+      participantsModifiers
+
+  MS.EventOccurences.before.insert (userId, eventOccurence) ->
+    if !eventOccurence.recurringEventId then return
+
+    recurringEventId = eventOccurence.recurringEventId
+    recurringEventId = ensureValidRecurringEvent userId, recurringEventId
+    eventOccurence.recurringEventId = recurringEventId
+
+  MS.EventOccurences.before.update (userId, eventOccurence, fieldNames, modifiers) ->
+    if !modifiers.$set.recurringEventId then return
+
+    recurringEventId = modifiers.$set.recurringEventId
+    recurringEventId = ensureValidRecurringEvent userId, recurringEventId
+    modifiers.$set.recurringEventId = recurringEventId
 
   MS.EventOccurences.after.insert (userId, eventOccurence) ->
-    if !eventOccurence.participantsIds or !eventOccurence.participantsIds.length
-      return
-
-    # add the event to the each participant list of events
-    participantsModifiers = $addToSet: eventOccurencesIds: eventOccurence._id
-
-    # and the recurring event if any
-    if !!eventOccurence.recurringEventId
-      participantsModifiers.$addToSet.recurringEventsIds = eventOccurence.recurringEventId
-
-    MS.Participants.direct.update
-      _id: $in: eventOccurence.participantsIds
-      participantsModifiers
+    updateParticipants userId, eventOccurence
 
   MS.EventOccurences.after.update (userId, eventOccurence) ->
-    if !eventOccurence.participantsIds or !eventOccurence.participantsIds.length
-      return
-    
-    # add the event to the each participant list of events
-    participantsModifiers = $addToSet: eventOccurencesIds: eventOccurence._id
-
-    # and the recurring event if any
-    if !!eventOccurence.recurringEventId
-      participantsModifiers.$addToSet.recurringEventsIds = eventOccurence.recurringEventId
-
-    MS.Participants.direct.update
-      _id: $in: eventOccurence.participantsIds
-      participantsModifiers
+    updateParticipants userId, eventOccurence
 
 ###
 Publications
@@ -123,7 +125,7 @@ Publications
 ###
 if Meteor.isServer
   Meteor.publish "eventOccurences", ->
-    MS.EventOccurences.findByUser @userId
+    findByUser @userId
 
   Meteor.publish "eventOccurence", (id)->
     MS.EventOccurences.find
