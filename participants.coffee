@@ -45,9 +45,15 @@ MS.Participants.allow
 Static methods
 --------------------------------------------------------------------------------
 ###
-MS.Participants.findByUser = (userId) ->
-  @find
+MS.Participants.findByUser = findByUser = (userId) ->
+  MS.Participants.find
     userId: userId
+  ,
+    sort: name: 1
+
+MS.Participants.findByRecurringEvent = findByRecurringEvent = (recurringEventId) ->
+  MS.Participants.find
+    recurringEventIds: recurringEventId
   ,
     sort: name: 1
 
@@ -79,7 +85,7 @@ Publications
 ###
 if Meteor.isServer
   Meteor.publish "participants", ->
-    MS.Participants.findByUser @userId
+    findByUser @userId
 
   Meteor.publish "participant", (id)->
     MS.Participants.find
