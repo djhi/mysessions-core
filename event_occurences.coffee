@@ -47,19 +47,24 @@ MS.EventOccurences.findByRecurringEvent = findByRecurringEvent = (recurringEvent
   MS.EventOccurences.find
     recurringEventId: recurringEventId
   ,
-    sort: date: - 1
+    sort: date: -1
 
 MS.EventOccurences.findByUser = findByUser = (userId) ->
   MS.EventOccurences.find
     userId: userId
   ,
-    sort: date: - 1
+    sort: date: -1
 
 ###
 Instance methods
 --------------------------------------------------------------------------------
 ###
 MS.EventOccurences.helpers
+  name: ->
+    recurringEventName = @recurringEvent().name
+    formattedDate = moment(@date).format('LL')
+    "#{recurringEventName} - #{formattedDate}"
+
   participantsCount: ->
     @participantsIds?.length or 0
 
