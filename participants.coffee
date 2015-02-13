@@ -84,8 +84,11 @@ Publications
 --------------------------------------------------------------------------------
 ###
 if Meteor.isServer
-  Meteor.publish "participants", ->
-    findByUser @userId
+  Meteor.publish "participants", (recurringEventId) ->
+    if !!recurringEventId
+      findByRecurringEvent recurringEventId
+    else
+      findByUser @userId
 
   Meteor.publish "participant", (id)->
     MS.Participants.find
