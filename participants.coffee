@@ -53,7 +53,7 @@ MS.Participants.findByUser = findByUser = (userId) ->
 
 MS.Participants.findByRecurringEvent = findByRecurringEvent = (recurringEventId) ->
   MS.Participants.find
-    recurringEventIds: recurringEventId
+    recurringEventsIds: recurringEventId
   ,
     sort: name: 1
 
